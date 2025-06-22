@@ -11,16 +11,16 @@ import { getAIResponse } from '@/api/openai';
 import { hasApiKey } from '@/config/env';
 
 const ChatScreenContainer = styled.div`
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: ${({ theme }) => theme.spacing[6]};
+  display: flex;
   height: 100vh;
   padding: ${({ theme }) => theme.spacing[6]};
   background: ${({ theme }) => theme.colors.background};
+  gap: ${({ theme }) => theme.spacing[6]};
   
   @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr 1fr;
+    flex-direction: column;
+    height: auto;
+    min-height: 100vh;
   }
 `;
 
@@ -29,13 +29,21 @@ const CharacterSection = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
+  flex: 0 0 50%;
+  min-height: 0;
+  
+  @media (max-width: ${({ theme }) => theme.breakpoints.lg}) {
+    flex: 0 0 auto;
+    min-height: 400px;
+  }
 `;
 
 const ChatSection = styled.div`
   display: flex;
   flex-direction: column;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 `;
 
 const WelcomeMessage = styled.div`
@@ -62,6 +70,8 @@ export function ChatScreen() {
 
   const messagesRef = useRef(messages);
   messagesRef.current = messages;
+
+  const welcomeMessageSent = useRef(false);
 
   const handleSendMessage = useCallback(async (messageText: string) => {
     if (!hasApiKey()) {
@@ -149,12 +159,13 @@ export function ChatScreen() {
 
   // Add welcome message on first load
   useEffect(() => {
-    if (messages.length === 0) {
+    if (messages.length === 0 && !welcomeMessageSent.current) {
       const welcomeMessage = createMessage(
         "Hello! I'm Mag, your emotional anime companion! I'm here to chat with you and respond to your emotions. How are you feeling today? 😊",
         'ai'
       );
       dispatch(addMessage(welcomeMessage));
+      welcomeMessageSent.current = true;
     }
   }, [dispatch, messages.length]);
 
